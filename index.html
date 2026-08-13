@@ -284,16 +284,19 @@
     <div class="step">
       <div class="step-head"><span class="num">2</span><h2>模型狀態</h2></div>
       <div class="train-status" id="trainStatus">尚未載入任何樣本</div>
-      <div class="row" style="margin-top:12px;">
-        <button id="saveModel">儲存到瀏覽器</button>
-        <button id="loadModel">讀取已儲存模型</button>
-      </div>
       <div class="row">
-        <button id="exportModel">匯出模型檔案</button>
-        <button id="importModelBtn">匯入模型檔案</button>
+        <button class="primary" id="exportModel">匯出模型檔案（model-R.json）</button>
+      </div>
+      <div class="hint">訓練好後點這裡下載 <code>model-R.json</code>，把它跟 <code>index.html</code>
+      放在同一個資料夾一起上傳到 GitHub repo，之後<b>任何裝置打開網頁都會自動載入</b>這個模型，
+      不用再手動匯入、也不用重新拍樣本。</div>
+      <div class="row" style="margin-top:12px;">
+        <button id="saveModel">另存到目前瀏覽器（暫存）</button>
+        <button id="loadModel">讀取瀏覽器暫存</button>
+        <button id="importModelBtn">手動匯入模型檔案</button>
         <input type="file" id="importFile" accept="application/json" hidden>
       </div>
-      <div class="hint">模型檔（.json）可分享給其他電腦／其他站別使用，不需重新拍攝樣本。建議訓練好後先「匯出模型檔案」備份。</div>
+      <div class="hint">以上三個是本機測試用的輔助功能：暫存於這台瀏覽器、或手動挑檔案匯入，正式部署請用上面的「匯出模型檔案」流程。</div>
     </div>
 
     <div class="step">
@@ -434,8 +437,26 @@
     setStandby('載入辨識模型中…');
     mobilenetModel = await mobilenet.load({ version: 2, alpha: 1.0 });
     classifier = knnClassifier.create();
-    setStandby('模型已就緒，請先拍攝 OK / NG 樣本');
     updateCounts();
+  }
+
+  // Auto-load a pre-trained model bundled next to index.html (model-R.json),
+  // so any device that opens the deployed page is ready to detect immediately —
+  // no manual import, no re-capturing samples per device.
+  async function tryAutoLoadBundledModel() {
+    try {
+      const res = await fetch('./model-R.json', { cache: 'no-store' });
+      if (!res.ok) return false;
+      const plain = await res.json();
+      const dataset = plainToDataset(plain);
+      classifier.setClassifierDataset(dataset);
+      updateCounts();
+      setStandby('已自動載入隨附的預訓練模型，可直接開始檢測');
+      showToast('已自動載入預訓練模型 model-R.json');
+      return true;
+    } catch (e) {
+      return false;
+    }
   }
 
   function getCounts() {
@@ -538,12 +559,12 @@
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = 'qc-lens-model-R.json';
+    a.download = 'model-R.json';
     document.body.appendChild(a);
     a.click();
     a.remove();
     URL.revokeObjectURL(url);
-    showToast('已匯出模型檔案');
+    showToast('已下載 model-R.json，請放到 index.html 同一資料夾並部署');
   });
 
   els.importModelBtn.addEventListener('click', () => els.importFile.click());
@@ -655,6 +676,10 @@
     await listCameras();
     try {
       await loadMobilenet();
+      const bundled = await tryAutoLoadBundledModel();
+      if (!bundled) {
+        setStandby('尚未找到 model-R.json，請先拍攝 OK / NG 樣本並訓練');
+      }
     } catch (e) {
       setStandby('模型載入失敗：' + e.message);
       showToast('模型載入失敗，請檢查網路連線');
