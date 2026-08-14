@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>光學鏡片檢測系統 — 右件 R</title>
+<title>光學鏡片檢測系統 — 右件 R（幾何檢測版）</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -35,7 +35,6 @@
     min-height:100vh;
     line-height:1.5;
   }
-  a{color:var(--accent);}
   h1,h2,h3{font-family:'Space Grotesk',sans-serif;margin:0;letter-spacing:.01em;}
   .mono{font-family:'IBM Plex Mono',monospace;}
 
@@ -67,15 +66,12 @@
     margin:0 auto;
     padding:clamp(16px,4vw,32px);
     display:grid;
-    grid-template-columns:minmax(0,1.15fr) minmax(280px,0.85fr);
+    grid-template-columns:minmax(0,1.15fr) minmax(300px,0.85fr);
     gap:28px;
     align-items:start;
   }
-  @media (max-width:880px){
-    main{grid-template-columns:1fr;}
-  }
+  @media (max-width:880px){ main{grid-template-columns:1fr;} }
 
-  /* ---- camera / signature lens frame ---- */
   .camera-col{display:flex;flex-direction:column;gap:14px;}
   .lens-frame{
     border-radius:var(--radius-lg);
@@ -88,7 +84,6 @@
     border:2px solid var(--panel-border);
     box-shadow:0 0 0 0 transparent;
     transition:box-shadow .35s ease, border-color .35s ease;
-    position:relative;
   }
   .lens-frame.state-ok{border-color:var(--ok);box-shadow:0 0 34px -4px rgba(34,197,94,.55);}
   .lens-frame.state-ng{border-color:var(--ng);box-shadow:0 0 34px -4px rgba(239,68,68,.6);}
@@ -101,12 +96,14 @@
     background:#000;
     aspect-ratio:4/3;
   }
-  video{width:100%;height:100%;object-fit:cover;display:block;transform:scaleX(-1);}
+  video{width:100%;height:100%;object-fit:contain;display:block;background:#000;}
+  canvas#overlay{position:absolute;inset:0;width:100%;height:100%;touch-action:none;}
   .video-placeholder{
     position:absolute;inset:0;
     display:flex;align-items:center;justify-content:center;
     text-align:center;padding:20px;
     color:var(--text-dim);font-size:14px;
+    pointer-events:none;
   }
 
   .status-banner{
@@ -132,7 +129,7 @@
   .status-banner .meta .conf{font-family:'IBM Plex Mono',monospace;font-size:15px;color:var(--text);}
 
   .camera-tools{display:flex;gap:10px;align-items:center;flex-wrap:wrap;}
-  select{
+  select, input[type="number"]{
     background:var(--panel);
     color:var(--text);
     border:1px solid var(--panel-border);
@@ -140,11 +137,10 @@
     padding:8px 10px;
     font-family:'Inter',sans-serif;
     font-size:13px;
-    flex:1;
-    min-width:160px;
   }
+  select{flex:1;min-width:160px;}
+  input[type="number"]{width:70px;font-family:'IBM Plex Mono',monospace;}
 
-  /* ---- control panel ---- */
   .control-panel{display:flex;flex-direction:column;gap:16px;}
   .step{
     background:var(--panel);
@@ -152,9 +148,7 @@
     border-radius:var(--radius-md);
     padding:16px 18px;
   }
-  .step .step-head{
-    display:flex;align-items:center;gap:10px;margin-bottom:12px;
-  }
+  .step .step-head{display:flex;align-items:center;gap:10px;margin-bottom:12px;}
   .step .num{
     font-family:'IBM Plex Mono',monospace;
     font-size:12px;
@@ -189,32 +183,17 @@
   }
   button.primary{background:var(--accent);color:#0b1512;border-color:var(--accent);}
   button.primary:hover{background:#7ff0dc;}
-  button.danger-outline{border-color:var(--ng);color:var(--ng);background:transparent;}
-  button.danger-outline:hover{background:var(--ng-dim);}
-  button.ok-outline{border-color:var(--ok);color:var(--ok);background:transparent;}
-  button.ok-outline:hover{background:var(--ok-dim);}
-
-  .count-pill{
-    font-family:'IBM Plex Mono',monospace;
-    font-size:12.5px;
-    color:var(--text-dim);
-    background:#0d1117;
-    border:1px solid var(--panel-border);
-    border-radius:999px;
-    padding:4px 10px;
-  }
-  .count-pill b{color:var(--text);}
 
   .hint{font-size:12.5px;color:var(--text-dim);margin-top:8px;}
-  .train-status{
+  .readout{
     margin-top:10px;font-size:13px;color:var(--text-dim);
     font-family:'IBM Plex Mono',monospace;
   }
-
   label.switch-row{
     display:flex;align-items:center;gap:8px;font-size:13.5px;color:var(--text-dim);cursor:pointer;
   }
   input[type="checkbox"]{width:16px;height:16px;accent-color:var(--accent);}
+  code{background:#0d1117;border:1px solid var(--panel-border);border-radius:4px;padding:1px 5px;font-family:'IBM Plex Mono',monospace;}
 
   footer{
     max-width:1180px;margin:0 auto;padding:8px clamp(16px,4vw,32px) 40px;
@@ -236,9 +215,9 @@
 <header>
   <div class="title-block">
     <h1>光學鏡片檢測系統</h1>
-    <span class="badge">右件 R</span>
+    <span class="badge">右件 R・幾何角度偵測</span>
   </div>
-  <div class="sub">純瀏覽器端影像辨識・無需伺服器・模型可離線訓練與匯出</div>
+  <div class="sub">OpenCV.js 純瀏覽器端運算・無需伺服器・不需拍攝訓練樣本</div>
 </header>
 
 <main>
@@ -246,6 +225,7 @@
     <div class="lens-frame state-standby" id="lensFrame">
       <div class="video-wrap">
         <video id="webcam" autoplay playsinline muted></video>
+        <canvas id="overlay"></canvas>
         <div class="video-placeholder" id="videoPlaceholder">
           正在啟動攝影機…<br>若未出現畫面，請確認已允許瀏覽器存取相機權限，
           且此頁面以 https 或 localhost 開啟。
@@ -269,84 +249,114 @@
   <div class="control-panel">
 
     <div class="step">
-      <div class="step-head"><span class="num">1</span><h2>收集樣本</h2></div>
+      <div class="step-head"><span class="num">1</span><h2>設定偵測框</h2></div>
       <div class="row">
-        <button class="ok-outline" id="captureOk">拍攝 OK 樣本</button>
-        <span class="count-pill">OK：<b id="okCount">0</b></span>
+        <button id="editRoiBtn">拖曳設定偵測框</button>
+        <button id="resetRoiBtn">重設為預設框</button>
       </div>
-      <div class="row">
-        <button class="danger-outline" id="captureNg">拍攝 NG 樣本</button>
-        <span class="count-pill">NG：<b id="ngCount">0</b></span>
-      </div>
-      <div class="hint">將零件對準鏡頭，分別針對「正確方向」與「錯誤方向／瑕疵」各拍攝 15～30 張以上樣本，角度與距離越多變化，辨識越穩定。</div>
+      <div class="hint">把零件放在治具上，在畫面上拖曳畫出一個框，框住斜槽所在的內凹區域就好（不用整個零件），之後偵測都只分析框內畫面。已提供一個置中的預設框可以直接試用。</div>
     </div>
 
     <div class="step">
-      <div class="step-head"><span class="num">2</span><h2>模型狀態</h2></div>
-      <div class="train-status" id="trainStatus">尚未載入任何樣本</div>
+      <div class="step-head"><span class="num">2</span><h2>校正正確角度</h2></div>
       <div class="row">
-        <button class="primary" id="exportModel">匯出模型檔案（model-R.json）</button>
+        <button class="primary" id="captureCalib">拍攝校正樣本</button>
+        <span class="hint" style="margin:0;">已拍攝：<b class="mono" id="calibCount">0</b> 筆</span>
       </div>
-      <div class="hint">訓練好後點這裡下載 <code>model-R.json</code>，把它跟 <code>index.html</code>
-      放在同一個資料夾一起上傳到 GitHub repo，之後<b>任何裝置打開網頁都會自動載入</b>這個模型，
-      不用再手動匯入、也不用重新拍樣本。</div>
+      <div class="readout" id="calibReadout">尚無校正樣本</div>
       <div class="row" style="margin-top:12px;">
-        <button id="saveModel">另存到目前瀏覽器（暫存）</button>
-        <button id="loadModel">讀取瀏覽器暫存</button>
-        <button id="importModelBtn">手動匯入模型檔案</button>
+        <label class="switch-row">容許誤差角度
+          <input type="number" id="toleranceInput" min="1" max="45" step="1" value="12">°
+        </label>
+        <button id="clearCalibBtn">清除重新校正</button>
+      </div>
+      <div class="hint">把「正確方向」的零件放在治具上，點「拍攝校正樣本」3～5 次（可以每次微調一下零件的擺放，讓校正涵蓋治具實際的公差範圍），程式會自動算出目標角度與建議容許誤差，你也可以自己調整容許誤差。</div>
+    </div>
+
+    <div class="step">
+      <div class="step-head"><span class="num">3</span><h2>設定檔（部署到其他裝置）</h2></div>
+      <div class="row">
+        <button class="primary" id="exportConfig">匯出設定檔（config-R.json）</button>
+      </div>
+      <div class="hint">校正好後點這裡下載 <code>config-R.json</code>，跟 <code>index.html</code> 放在同一資料夾一起上傳到 GitHub repo，之後<b>任何裝置打開網頁都會自動套用</b>這組偵測框與角度設定，不用在該裝置上重新校正。</div>
+      <div class="row" style="margin-top:12px;">
+        <button id="saveLocal">另存到目前瀏覽器（暫存）</button>
+        <button id="loadLocal">讀取瀏覽器暫存</button>
+        <button id="importConfigBtn">手動匯入設定檔</button>
         <input type="file" id="importFile" accept="application/json" hidden>
       </div>
-      <div class="hint">以上三個是本機測試用的輔助功能：暫存於這台瀏覽器、或手動挑檔案匯入，正式部署請用上面的「匯出模型檔案」流程。</div>
     </div>
 
     <div class="step">
-      <div class="step-head"><span class="num">3</span><h2>即時檢測</h2></div>
+      <div class="step-head"><span class="num">4</span><h2>即時檢測</h2></div>
       <div class="row">
         <button class="primary" id="startBtn" disabled>開始即時檢測</button>
         <button id="stopBtn" disabled>停止</button>
       </div>
       <div class="row">
-        <label class="switch-row"><input type="checkbox" id="soundToggle" checked> NG 時發出警示聲</label>
+        <label class="switch-row"><input type="checkbox" id="soundToggle" checked> 音效提示（NG 長音 2 秒／OK 短音兩聲）</label>
       </div>
-      <div class="hint">至少需要 OK 與 NG 各 1 筆樣本才能開始檢測；建議每類至少 15 筆以上再上線使用。</div>
+      <div class="hint">需完成上方偵測框與角度校正才能開始。NG 狀態若持續未排除，每 3 秒會再響一次長音提醒。</div>
     </div>
 
   </div>
 </main>
 
 <footer>
-  以 TensorFlow.js（MobileNet 特徵擷取 + KNN 分類器）於瀏覽器本機執行，所有影像與模型皆不會上傳到任何伺服器。適合部署於 GitHub Pages 等純靜態託管服務。
+  以 OpenCV.js（邊緣偵測＋直線角度量測）於瀏覽器本機執行，所有影像皆不會上傳到任何伺服器。判斷依據是量出來的實際角度數值，不需要收集大量樣本訓練 AI 模型。適合部署於 GitHub Pages 等純靜態託管服務。
 </footer>
 
 <div class="toast" id="toast"></div>
 
-<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.20.0/dist/tf.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/mobilenet@2.1.1/dist/mobilenet.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/knn-classifier@1.2.5/dist/knn-classifier.min.js"></script>
+<script>
+  window.cvReadyResolve = null;
+  window.cvReady = new Promise((resolve) => { window.cvReadyResolve = resolve; });
+  function onOpenCvScriptLoad() {
+    if (window.cv && window.cv.getBuildInformation) {
+      window.cvReadyResolve();
+    } else if (window.cv) {
+      window.cv['onRuntimeInitialized'] = () => window.cvReadyResolve();
+    } else {
+      // fallback: poll briefly in case cv attaches slightly after onload
+      const t = setInterval(() => {
+        if (window.cv && window.cv.getBuildInformation) {
+          clearInterval(t);
+          window.cvReadyResolve();
+        } else if (window.cv && window.cv.onRuntimeInitialized === undefined) {
+          window.cv['onRuntimeInitialized'] = () => { clearInterval(t); window.cvReadyResolve(); };
+        }
+      }, 50);
+    }
+  }
+</script>
+<script async src="https://docs.opencv.org/4.8.0/opencv.js" onload="onOpenCvScriptLoad()"></script>
 
 <script>
 (() => {
-  const STORAGE_KEY = 'qc-lens-model-R';
-  const LABELS = { OK: 'OK', NG: 'NG' };
+  const STORAGE_KEY = 'qc-lens-config-R';
+  const CONFIG_FILENAME = 'config-R.json';
 
   const els = {
     video: document.getElementById('webcam'),
     videoPlaceholder: document.getElementById('videoPlaceholder'),
+    overlay: document.getElementById('overlay'),
     lensFrame: document.getElementById('lensFrame'),
     statusBanner: document.getElementById('statusBanner'),
     statusLabel: document.getElementById('statusLabel'),
     statusSub: document.getElementById('statusSub'),
     statusConf: document.getElementById('statusConf'),
     cameraSelect: document.getElementById('cameraSelect'),
-    captureOk: document.getElementById('captureOk'),
-    captureNg: document.getElementById('captureNg'),
-    okCount: document.getElementById('okCount'),
-    ngCount: document.getElementById('ngCount'),
-    trainStatus: document.getElementById('trainStatus'),
-    saveModel: document.getElementById('saveModel'),
-    loadModel: document.getElementById('loadModel'),
-    exportModel: document.getElementById('exportModel'),
-    importModelBtn: document.getElementById('importModelBtn'),
+    editRoiBtn: document.getElementById('editRoiBtn'),
+    resetRoiBtn: document.getElementById('resetRoiBtn'),
+    captureCalib: document.getElementById('captureCalib'),
+    calibCount: document.getElementById('calibCount'),
+    calibReadout: document.getElementById('calibReadout'),
+    toleranceInput: document.getElementById('toleranceInput'),
+    clearCalibBtn: document.getElementById('clearCalibBtn'),
+    exportConfig: document.getElementById('exportConfig'),
+    saveLocal: document.getElementById('saveLocal'),
+    loadLocal: document.getElementById('loadLocal'),
+    importConfigBtn: document.getElementById('importConfigBtn'),
     importFile: document.getElementById('importFile'),
     startBtn: document.getElementById('startBtn'),
     stopBtn: document.getElementById('stopBtn'),
@@ -354,13 +364,27 @@
     toast: document.getElementById('toast'),
   };
 
-  let mobilenetModel = null;
-  let classifier = null;
+  let cv = null;
+  let currentStream = null;
+  let captureCanvas = null;
+
+  let roi = null; // {x,y,w,h} normalized 0..1 in the video's native pixel frame
+  let calibrating = false;
+  let dragStart = null;
+  let dragCurrent = null;
+
+  let calibSamples = [];
+  let targetAngle = null;
+  let tolerance = 12;
+  let toleranceManuallySet = false;
+
   let isRunning = false;
-  let rafId = null;
+  let detectTimer = null;
+  let lastLabel = null;
   let audioCtx = null;
   let ngBeepTimer = null;
-  let currentStream = null;
+
+  const DEFAULT_ROI = { x: 0.22, y: 0.22, w: 0.56, h: 0.56 };
 
   function showToast(msg, ms = 2200) {
     els.toast.textContent = msg;
@@ -405,14 +429,10 @@
   }
 
   async function startCamera(deviceId) {
-    if (currentStream) {
-      currentStream.getTracks().forEach(t => t.stop());
-    }
+    if (currentStream) currentStream.getTracks().forEach(t => t.stop());
     const constraints = {
       audio: false,
-      video: deviceId
-        ? { deviceId: { exact: deviceId } }
-        : { facingMode: 'environment' },
+      video: deviceId ? { deviceId: { exact: deviceId } } : { facingMode: 'environment' },
     };
     try {
       const stream = await navigator.mediaDevices.getUserMedia(constraints);
@@ -421,7 +441,9 @@
       await new Promise(res => (els.video.onloadedmetadata = res));
       els.video.play();
       els.videoPlaceholder.style.display = 'none';
-      await listCameras(); // labels become available after permission granted
+      await listCameras();
+      resizeOverlay();
+      drawOverlay();
     } catch (e) {
       els.videoPlaceholder.style.display = 'flex';
       els.videoPlaceholder.textContent =
@@ -429,156 +451,328 @@
       showToast('攝影機啟動失敗');
     }
   }
-
   els.cameraSelect.addEventListener('change', () => startCamera(els.cameraSelect.value));
+  window.addEventListener('resize', () => { resizeOverlay(); drawOverlay(); });
 
-  // ---------- Model ----------
-  async function loadMobilenet() {
-    setStandby('載入辨識模型中…');
-    mobilenetModel = await mobilenet.load({ version: 2, alpha: 1.0 });
-    classifier = knnClassifier.create();
-    updateCounts();
+  // ---------- Coordinate mapping (object-fit: contain) ----------
+  function getVideoDisplayRect() {
+    const wrap = els.video.parentElement;
+    const wrapRect = wrap.getBoundingClientRect();
+    const vw = els.video.videoWidth || 4;
+    const vh = els.video.videoHeight || 3;
+    const wrapAR = wrapRect.width / wrapRect.height;
+    const videoAR = vw / vh;
+    let dispW, dispH, offX, offY;
+    if (videoAR > wrapAR) {
+      dispW = wrapRect.width;
+      dispH = dispW / videoAR;
+      offX = 0;
+      offY = (wrapRect.height - dispH) / 2;
+    } else {
+      dispH = wrapRect.height;
+      dispW = dispH * videoAR;
+      offY = 0;
+      offX = (wrapRect.width - dispW) / 2;
+    }
+    return { offX, offY, dispW, dispH, wrapRect };
   }
 
-  // Auto-load a pre-trained model bundled next to index.html (model-R.json),
-  // so any device that opens the deployed page is ready to detect immediately —
-  // no manual import, no re-capturing samples per device.
-  async function tryAutoLoadBundledModel() {
+  function clientToNorm(clientX, clientY) {
+    const { offX, offY, dispW, dispH, wrapRect } = getVideoDisplayRect();
+    const localX = clientX - wrapRect.left - offX;
+    const localY = clientY - wrapRect.top - offY;
+    return {
+      x: Math.min(1, Math.max(0, localX / dispW)),
+      y: Math.min(1, Math.max(0, localY / dispH)),
+    };
+  }
+
+  function resizeOverlay() {
+    const wrap = els.video.parentElement;
+    els.overlay.width = wrap.clientWidth;
+    els.overlay.height = wrap.clientHeight;
+  }
+
+  function drawOverlay() {
+    const ctx = els.overlay.getContext('2d');
+    ctx.clearRect(0, 0, els.overlay.width, els.overlay.height);
+    const { offX, offY, dispW, dispH } = getVideoDisplayRect();
+
+    if (roi) {
+      ctx.strokeStyle = calibrating ? '#f59e0b' : '#5eead4';
+      ctx.lineWidth = 2;
+      ctx.setLineDash(calibrating ? [6, 4] : []);
+      ctx.strokeRect(offX + roi.x * dispW, offY + roi.y * dispH, roi.w * dispW, roi.h * dispH);
+    }
+    if (calibrating && dragStart && dragCurrent) {
+      const x1 = Math.min(dragStart.x, dragCurrent.x);
+      const y1 = Math.min(dragStart.y, dragCurrent.y);
+      const w = Math.abs(dragCurrent.x - dragStart.x);
+      const h = Math.abs(dragCurrent.y - dragStart.y);
+      ctx.strokeStyle = '#f59e0b';
+      ctx.lineWidth = 2;
+      ctx.setLineDash([4, 3]);
+      ctx.strokeRect(offX + x1 * dispW, offY + y1 * dispH, w * dispW, h * dispH);
+    }
+  }
+
+  // ---------- ROI editing ----------
+  function enterCalibrateMode() {
+    calibrating = true;
+    dragStart = null;
+    dragCurrent = null;
+    els.overlay.style.cursor = 'crosshair';
+    showToast('在畫面上拖曳畫出偵測框');
+    drawOverlay();
+  }
+  els.editRoiBtn.addEventListener('click', enterCalibrateMode);
+  els.resetRoiBtn.addEventListener('click', () => {
+    roi = { ...DEFAULT_ROI };
+    calibrating = false;
+    drawOverlay();
+    showToast('已重設為預設偵測框');
+  });
+
+  els.overlay.addEventListener('pointerdown', (e) => {
+    if (!calibrating) return;
+    dragStart = clientToNorm(e.clientX, e.clientY);
+    dragCurrent = dragStart;
+    drawOverlay();
+  });
+  els.overlay.addEventListener('pointermove', (e) => {
+    if (!calibrating || !dragStart) return;
+    dragCurrent = clientToNorm(e.clientX, e.clientY);
+    drawOverlay();
+  });
+  window.addEventListener('pointerup', () => {
+    if (!calibrating || !dragStart || !dragCurrent) return;
+    const x1 = Math.min(dragStart.x, dragCurrent.x);
+    const y1 = Math.min(dragStart.y, dragCurrent.y);
+    const w = Math.abs(dragCurrent.x - dragStart.x);
+    const h = Math.abs(dragCurrent.y - dragStart.y);
+    if (w > 0.03 && h > 0.03) {
+      roi = { x: x1, y: y1, w, h };
+      showToast('偵測框已設定');
+    }
+    calibrating = false;
+    dragStart = null;
+    dragCurrent = null;
+    els.overlay.style.cursor = 'default';
+    drawOverlay();
+  });
+
+  // ---------- OpenCV angle detection ----------
+  function getCaptureCanvas(w, h) {
+    if (!captureCanvas) captureCanvas = document.createElement('canvas');
+    if (captureCanvas.width !== w || captureCanvas.height !== h) {
+      captureCanvas.width = w;
+      captureCanvas.height = h;
+    }
+    return captureCanvas;
+  }
+
+  function angleFromLine(x1, y1, x2, y2) {
+    let ang = Math.atan2(y2 - y1, x2 - x1) * 180 / Math.PI;
+    while (ang <= -90) ang += 180;
+    while (ang > 90) ang -= 180;
+    return ang;
+  }
+
+  function angularDiff(a, target) {
+    let d = a - target;
+    while (d > 90) d -= 180;
+    while (d < -90) d += 180;
+    return d;
+  }
+
+  // Returns a measured line angle in degrees, or null if no reliable line found.
+  function detectAngleOnce() {
+    if (!cv || !roi) return null;
+    const vw = els.video.videoWidth;
+    const vh = els.video.videoHeight;
+    if (!vw || !vh) return null;
+
+    const cnv = getCaptureCanvas(vw, vh);
+    const ctx = cnv.getContext('2d');
+    ctx.drawImage(els.video, 0, 0, vw, vh);
+    const imgData = ctx.getImageData(0, 0, vw, vh);
+
+    const src = cv.matFromImageData(imgData);
+    let roiMat = null, gray = null, edges = null, lines = null;
+    let angle = null;
     try {
-      const res = await fetch('./model-R.json', { cache: 'no-store' });
+      const rx = Math.max(0, Math.round(roi.x * vw));
+      const ry = Math.max(0, Math.round(roi.y * vh));
+      const rw = Math.max(4, Math.min(vw - rx, Math.round(roi.w * vw)));
+      const rh = Math.max(4, Math.min(vh - ry, Math.round(roi.h * vh)));
+      const rect = new cv.Rect(rx, ry, rw, rh);
+      roiMat = src.roi(rect);
+
+      gray = new cv.Mat();
+      cv.cvtColor(roiMat, gray, cv.COLOR_RGBA2GRAY);
+      cv.GaussianBlur(gray, gray, new cv.Size(5, 5), 0);
+
+      edges = new cv.Mat();
+      cv.Canny(gray, edges, 50, 150);
+
+      lines = new cv.Mat();
+      const minLineLen = Math.max(15, Math.round(Math.min(rw, rh) * 0.35));
+      cv.HoughLinesP(edges, lines, 1, Math.PI / 180, 25, minLineLen, 12);
+
+      let bestLen = 0, best = null;
+      for (let i = 0; i < lines.rows; i++) {
+        const x1 = lines.data32S[i * 4];
+        const y1 = lines.data32S[i * 4 + 1];
+        const x2 = lines.data32S[i * 4 + 2];
+        const y2 = lines.data32S[i * 4 + 3];
+        const len = Math.hypot(x2 - x1, y2 - y1);
+        if (len > bestLen) { bestLen = len; best = { x1, y1, x2, y2 }; }
+      }
+      if (best) angle = angleFromLine(best.x1, best.y1, best.x2, best.y2);
+    } finally {
+      src.delete();
+      if (roiMat) roiMat.delete();
+      if (gray) gray.delete();
+      if (edges) edges.delete();
+      if (lines) lines.delete();
+    }
+    return angle;
+  }
+
+  // ---------- Calibration ----------
+  function updateCalibDisplay() {
+    els.calibCount.textContent = calibSamples.length;
+    if (calibSamples.length > 0) {
+      const avg = calibSamples.reduce((a, b) => a + b, 0) / calibSamples.length;
+      const variance = calibSamples.reduce((a, b) => a + (b - avg) ** 2, 0) / calibSamples.length;
+      const std = Math.sqrt(variance);
+      targetAngle = avg;
+      if (!toleranceManuallySet) {
+        tolerance = Math.max(8, Math.round(std * 3 + 3));
+        els.toleranceInput.value = tolerance;
+      }
+      els.calibReadout.textContent = `平均角度 ${avg.toFixed(1)}°（標準差 ${std.toFixed(1)}°），容許誤差 ±${tolerance}°`;
+    } else {
+      els.calibReadout.textContent = '尚無校正樣本';
+      targetAngle = null;
+    }
+    updateReadiness();
+  }
+
+  function updateReadiness() {
+    const ready = !!roi && targetAngle !== null;
+    els.startBtn.disabled = !ready || isRunning;
+    if (!ready && !isRunning) setStandby(roi ? '請先拍攝校正樣本' : '請先設定偵測框');
+  }
+
+  els.captureCalib.addEventListener('click', () => {
+    if (!roi) { showToast('請先設定偵測框'); return; }
+    if (!cv) { showToast('OpenCV 尚未載入完成，請稍候'); return; }
+    const angle = detectAngleOnce();
+    if (angle === null) { showToast('沒有偵測到線條，請確認零件與偵測框對齊'); return; }
+    calibSamples.push(angle);
+    updateCalibDisplay();
+    showToast(`已記錄一筆校正樣本（${angle.toFixed(1)}°）`);
+  });
+
+  els.clearCalibBtn.addEventListener('click', () => {
+    calibSamples = [];
+    targetAngle = null;
+    toleranceManuallySet = false;
+    tolerance = 12;
+    els.toleranceInput.value = 12;
+    updateCalibDisplay();
+    showToast('已清除校正資料');
+  });
+
+  els.toleranceInput.addEventListener('input', () => {
+    const v = parseFloat(els.toleranceInput.value);
+    if (!isNaN(v) && v > 0) {
+      tolerance = v;
+      toleranceManuallySet = true;
+      updateCalibDisplay();
+    }
+  });
+
+  // ---------- Config save / load / export / import ----------
+  function configToPlain() {
+    return { roi, targetAngle, tolerance, samples: calibSamples };
+  }
+
+  function applyConfig(cfg) {
+    if (!cfg || !cfg.roi || typeof cfg.targetAngle !== 'number') {
+      throw new Error('設定檔格式不正確');
+    }
+    roi = cfg.roi;
+    targetAngle = cfg.targetAngle;
+    tolerance = typeof cfg.tolerance === 'number' ? cfg.tolerance : 12;
+    toleranceManuallySet = true;
+    calibSamples = Array.isArray(cfg.samples) ? cfg.samples : [];
+    els.toleranceInput.value = tolerance;
+    els.calibCount.textContent = calibSamples.length;
+    els.calibReadout.textContent = `已套用設定：目標角度 ${targetAngle.toFixed(1)}°，容許誤差 ±${tolerance}°`;
+    updateReadiness();
+    drawOverlay();
+  }
+
+  async function tryAutoLoadBundledConfig() {
+    try {
+      const res = await fetch('./' + CONFIG_FILENAME, { cache: 'no-store' });
       if (!res.ok) return false;
-      const plain = await res.json();
-      const dataset = plainToDataset(plain);
-      classifier.setClassifierDataset(dataset);
-      updateCounts();
-      setStandby('已自動載入隨附的預訓練模型，可直接開始檢測');
-      showToast('已自動載入預訓練模型 model-R.json');
+      const cfg = await res.json();
+      applyConfig(cfg);
+      setStandby('已自動載入隨附的設定檔，可直接開始檢測');
+      showToast('已自動載入 ' + CONFIG_FILENAME);
       return true;
     } catch (e) {
       return false;
     }
   }
 
-  function getCounts() {
-    if (!classifier) return { OK: 0, NG: 0 };
-    const counts = classifier.getClassExampleCount();
-    return { OK: counts[LABELS.OK] || 0, NG: counts[LABELS.NG] || 0 };
-  }
-
-  function updateCounts() {
-    const c = getCounts();
-    els.okCount.textContent = c.OK;
-    els.ngCount.textContent = c.NG;
-    const total = c.OK + c.NG;
-    if (total === 0) {
-      els.trainStatus.textContent = '尚未載入任何樣本';
-    } else {
-      els.trainStatus.textContent = `目前樣本：OK ${c.OK} 筆／NG ${c.NG} 筆`;
-    }
-    const canStart = c.OK > 0 && c.NG > 0;
-    els.startBtn.disabled = !canStart || isRunning;
-    if (!canStart && !isRunning) {
-      setStandby('至少需要 OK 與 NG 各 1 筆樣本');
-    }
-  }
-
-  function captureFrame() {
-    return tf.tidy(() => {
-      const img = tf.browser.fromPixels(els.video);
-      return mobilenetModel.infer(img, true);
-    });
-  }
-
-  els.captureOk.addEventListener('click', () => {
-    if (!classifier || !mobilenetModel) return;
-    const activation = captureFrame();
-    classifier.addExample(activation, LABELS.OK);
-    updateCounts();
-    showToast('已新增 1 筆 OK 樣本');
+  els.exportConfig.addEventListener('click', () => {
+    if (!roi || targetAngle === null) { showToast('請先完成偵測框與角度校正'); return; }
+    const blob = new Blob([JSON.stringify(configToPlain())], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = CONFIG_FILENAME;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+    showToast(`已下載 ${CONFIG_FILENAME}，請放到 index.html 同一資料夾並部署`);
   });
 
-  els.captureNg.addEventListener('click', () => {
-    if (!classifier || !mobilenetModel) return;
-    const activation = captureFrame();
-    classifier.addExample(activation, LABELS.NG);
-    updateCounts();
-    showToast('已新增 1 筆 NG 樣本');
-  });
-
-  // ---------- Save / load / export / import ----------
-  function datasetToPlain(dataset) {
-    const out = {};
-    Object.keys(dataset).forEach(label => {
-      const t = dataset[label];
-      out[label] = { shape: t.shape, data: Array.from(t.dataSync()) };
-    });
-    return out;
-  }
-
-  function plainToDataset(plain) {
-    const out = {};
-    Object.keys(plain).forEach(label => {
-      const { shape, data } = plain[label];
-      out[label] = tf.tensor(data, shape);
-    });
-    return out;
-  }
-
-  els.saveModel.addEventListener('click', () => {
-    if (!classifier) return;
-    const c = getCounts();
-    if (c.OK + c.NG === 0) { showToast('目前沒有樣本可儲存'); return; }
-    const plain = datasetToPlain(classifier.getClassifierDataset());
+  els.saveLocal.addEventListener('click', () => {
+    if (!roi || targetAngle === null) { showToast('請先完成偵測框與角度校正'); return; }
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(plain));
-      showToast('已儲存模型到此瀏覽器');
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(configToPlain()));
+      showToast('已暫存到此瀏覽器');
     } catch (e) {
       showToast('儲存失敗：' + e.message);
     }
   });
 
-  els.loadModel.addEventListener('click', () => {
+  els.loadLocal.addEventListener('click', () => {
     const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) { showToast('此瀏覽器沒有已儲存的模型'); return; }
+    if (!raw) { showToast('此瀏覽器沒有暫存的設定'); return; }
     try {
-      const dataset = plainToDataset(JSON.parse(raw));
-      classifier.setClassifierDataset(dataset);
-      updateCounts();
-      showToast('已讀取儲存的模型');
+      applyConfig(JSON.parse(raw));
+      showToast('已讀取瀏覽器暫存設定');
     } catch (e) {
       showToast('讀取失敗：' + e.message);
     }
   });
 
-  els.exportModel.addEventListener('click', () => {
-    if (!classifier) return;
-    const c = getCounts();
-    if (c.OK + c.NG === 0) { showToast('目前沒有樣本可匯出'); return; }
-    const plain = datasetToPlain(classifier.getClassifierDataset());
-    const blob = new Blob([JSON.stringify(plain)], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'model-R.json';
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-    URL.revokeObjectURL(url);
-    showToast('已下載 model-R.json，請放到 index.html 同一資料夾並部署');
-  });
-
-  els.importModelBtn.addEventListener('click', () => els.importFile.click());
-  els.importFile.addEventListener('change', e => {
+  els.importConfigBtn.addEventListener('click', () => els.importFile.click());
+  els.importFile.addEventListener('change', (e) => {
     const file = e.target.files[0];
     if (!file) return;
     const reader = new FileReader();
-    reader.onload = ev => {
+    reader.onload = (ev) => {
       try {
-        const plain = JSON.parse(ev.target.result);
-        const dataset = plainToDataset(plain);
-        classifier.setClassifierDataset(dataset);
-        updateCounts();
-        showToast('已匯入模型檔案');
+        applyConfig(JSON.parse(ev.target.result));
+        showToast('已匯入設定檔');
       } catch (err) {
         showToast('匯入失敗：檔案格式錯誤');
       }
@@ -587,103 +781,119 @@
     els.importFile.value = '';
   });
 
-  // ---------- Detection loop ----------
+  // ---------- Audio ----------
   function ensureAudio() {
-    if (!audioCtx) {
-      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    }
+    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     if (audioCtx.state === 'suspended') audioCtx.resume();
   }
 
-  function playBeep() {
+  function playLongBeep(durationSec) {
     if (!els.soundToggle.checked) return;
     ensureAudio();
+    const now = audioCtx.currentTime;
     const osc = audioCtx.createOscillator();
     const gain = audioCtx.createGain();
     osc.type = 'square';
-    osc.frequency.value = 880;
-    gain.gain.setValueAtTime(0.0001, audioCtx.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.25, audioCtx.currentTime + 0.01);
-    gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.18);
+    osc.frequency.value = 740;
+    gain.gain.setValueAtTime(0.0001, now);
+    gain.gain.exponentialRampToValueAtTime(0.28, now + 0.05);
+    gain.gain.setValueAtTime(0.28, now + durationSec - 0.08);
+    gain.gain.exponentialRampToValueAtTime(0.0001, now + durationSec);
     osc.connect(gain);
     gain.connect(audioCtx.destination);
-    osc.start();
-    osc.stop(audioCtx.currentTime + 0.2);
+    osc.start(now);
+    osc.stop(now + durationSec);
   }
 
-  function handleResult(result) {
-    const label = result.label;
-    const conf = result.confidences[label] || 0;
-    const pct = Math.round(conf * 100);
+  function playShortBeep() {
+    if (!els.soundToggle.checked) return;
+    ensureAudio();
+    const now = audioCtx.currentTime;
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.type = 'square';
+    osc.frequency.value = 1175;
+    gain.gain.setValueAtTime(0.0001, now);
+    gain.gain.exponentialRampToValueAtTime(0.25, now + 0.01);
+    gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.12);
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+    osc.start(now);
+    osc.stop(now + 0.13);
+  }
 
-    setFrameState(label === LABELS.OK ? 'ok' : 'ng');
+  function playOkChime() {
+    playShortBeep();
+    setTimeout(playShortBeep, 220);
+  }
+
+  // ---------- Detection loop ----------
+  function handleResult(label, detail) {
+    setFrameState(label === 'OK' ? 'ok' : 'ng');
     els.statusLabel.textContent = label;
-    els.statusSub.textContent = label === LABELS.OK ? '方向正確' : '方向錯誤／不合格';
-    els.statusConf.textContent = `信心值 ${pct}%`;
+    els.statusSub.textContent = label === 'OK' ? '方向正確' : '方向錯誤／未偵測到';
+    els.statusConf.textContent = detail;
 
-    if (label === LABELS.NG) {
-      if (!ngBeepTimer) {
-        playBeep();
-        ngBeepTimer = setInterval(playBeep, 1400);
-      }
-    } else {
+    if (label !== lastLabel) {
       if (ngBeepTimer) { clearInterval(ngBeepTimer); ngBeepTimer = null; }
+      if (label === 'NG') {
+        playLongBeep(2);
+        ngBeepTimer = setInterval(() => playLongBeep(2), 3000);
+      } else {
+        playOkChime();
+      }
+      lastLabel = label;
     }
   }
 
-  async function detectLoop() {
-    if (!isRunning) return;
-    const c = getCounts();
-    const k = Math.max(1, Math.min(10, c.OK, c.NG));
-    const activation = captureFrame();
-    try {
-      const result = await classifier.predictClass(activation, k);
-      handleResult(result);
-    } catch (e) {
-      // ignore transient errors mid-frame
-    } finally {
-      activation.dispose();
+  function runDetectionTick() {
+    const angle = detectAngleOnce();
+    if (angle === null) {
+      handleResult('NG', '未偵測到斜槽線條');
+      return;
     }
-    rafId = requestAnimationFrame(detectLoop);
+    const diff = angularDiff(angle, targetAngle);
+    if (Math.abs(diff) <= tolerance) {
+      handleResult('OK', `角度 ${angle.toFixed(1)}°（差 ${diff.toFixed(1)}°）`);
+    } else {
+      handleResult('NG', `角度 ${angle.toFixed(1)}°（差 ${diff.toFixed(1)}°，超出 ±${tolerance}°）`);
+    }
   }
 
   els.startBtn.addEventListener('click', () => {
+    if (!roi || targetAngle === null) { showToast('請先完成偵測框與角度校正'); return; }
     ensureAudio();
-    const c = getCounts();
-    if (c.OK === 0 || c.NG === 0) { showToast('請先各拍攝至少 1 筆 OK 與 NG 樣本'); return; }
     isRunning = true;
+    lastLabel = null;
     els.startBtn.disabled = true;
     els.stopBtn.disabled = false;
-    els.captureOk.disabled = true;
-    els.captureNg.disabled = true;
-    detectLoop();
+    detectTimer = setInterval(runDetectionTick, 200);
   });
 
   els.stopBtn.addEventListener('click', () => {
     isRunning = false;
-    if (rafId) cancelAnimationFrame(rafId);
+    lastLabel = null;
+    if (detectTimer) { clearInterval(detectTimer); detectTimer = null; }
     if (ngBeepTimer) { clearInterval(ngBeepTimer); ngBeepTimer = null; }
     els.stopBtn.disabled = true;
-    els.captureOk.disabled = false;
-    els.captureNg.disabled = false;
-    updateCounts();
     setStandby('已停止檢測');
+    updateReadiness();
   });
 
   // ---------- Boot ----------
   (async function boot() {
+    roi = { ...DEFAULT_ROI };
     await startCamera();
     await listCameras();
-    try {
-      await loadMobilenet();
-      const bundled = await tryAutoLoadBundledModel();
-      if (!bundled) {
-        setStandby('尚未找到 model-R.json，請先拍攝 OK / NG 樣本並訓練');
-      }
-    } catch (e) {
-      setStandby('模型載入失敗：' + e.message);
-      showToast('模型載入失敗，請檢查網路連線');
+    setStandby('載入 OpenCV 中…');
+    await window.cvReady;
+    cv = window.cv;
+    const bundled = await tryAutoLoadBundledConfig();
+    if (!bundled) {
+      updateCalibDisplay();
+      setStandby('請先拍攝校正樣本（已套用預設偵測框）');
     }
+    drawOverlay();
   })();
 })();
 </script>
